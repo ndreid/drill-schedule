@@ -1,0 +1,98 @@
+import { SET_CREWS, ADD_CREW, UPDATE_CREW, DELETE_CREW, CrewActionTypes } from '../action-types/crew-action-types'
+import { crews as crews_reducer } from '../reducers/crews-reducer'
+import { sqlService } from '../../services'
+import { ScheduleTypeMap } from '../../models'
+import { StoreState, ScheduleType, PartialRecord } from '../../types'
+import { Dispatcher } from '../middleware/batched-thunk';
+import { movePad } from './pad-actions';
+
+// DISPATCHERS
+export const loadCrews = (opsScheduleID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
+  new Promise((resolve, reject) => {
+    sqlService.getCrews(opsScheduleID)
+    .then(crewModels => {
+      let crews: Record<string, Record<number, string>> = {
+        [ScheduleType.Construction]: {},
+        [ScheduleType.Drill]: {},
+        [ScheduleType.Frac]: {},
+        [ScheduleType.DrillOut]: {},
+        [ScheduleType.Facilities]: {},
+        [ScheduleType.Flowback]: {},
+      }
+      for (let crew of crewModels) {
+        crews[ScheduleTypeMap[crew.scheduleTypeID]][crew.crewID] = crew.crewName
+      }
+
+      dispatcher.batchAction(a_setCrews(newState, crews))
+      resolve()
+    })
+    .catch(err => reject(err))
+  })
+)
+
+export const updateCrews = (scheduleType: ScheduleType, crews: Record<number, string>, newCrews: string[]) => (dispatcher: Dispatcher, newState: StoreState) => (
+  new Promise((resolve, reject) => {
+    let scheduleCrews = newState.crews[scheduleType]
+    let actions = []
+    for (let [id, name] of Object.entries(scheduleCrews)) {
+      if (!crews[id])
+        actions.push(dispatcher.dispatchSingle(deleteCrew(scheduleType, +id)))
+      else if (name !== crews[id])
+        dispatcher.batchAction(a_updateCrew(newState, scheduleType, +id, name))
+    }
+    for (let newCrewName of newCrews)
+      actions.push(sqlService.getNextCrewID().then((crewID) => {
+        dispatcher.batchAction(a_addCrew(newState, scheduleType, crewID, newCrewName))
+      }))
+
+    Promise.all(actions).then(resolve)
+  })
+)
+
+export const deleteCrew = (scheduleType: ScheduleType, crewID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
+  new Promise((resolve, reject) => {
+    let pads = Object.values(newState.pads).filter(p => p.crews[scheduleType] === crewID)
+    dispatcher.dispatchMany(pads.map(p => movePad(scheduleType, p.padID, undefined, undefined))).then(() => {
+      dispatcher.batchAction(a_deleteCrew(newState, scheduleType, crewID))
+      resolve()
+    })
+  })
+)
+
+
+// ACTIONS
+const a_setCrews = (newState: StoreState, crews: PartialRecord<ScheduleType, Record<number, string>>) => {
+  let a: CrewActionTypes = {
+    type: SET_CREWS,
+    payload: crews
+  }
+  newState.crews = crews_reducer(newState.crews, a)
+  return a
+}
+
+const a_addCrew = (newState: StoreState, scheduleType: ScheduleType, crewID: number, crewName: string) => {
+  const a: CrewActionTypes = {
+    type: ADD_CREW,
+    payload: { scheduleType, crewID, crewName }
+  }
+  newState.crews = crews_reducer(newState.crews, a)
+  return a
+}
+
+const a_updateCrew = (newState: StoreState, scheduleType: ScheduleType, crewID: number, crewName: string) => {
+  const a: CrewActionTypes = {
+    type: UPDATE_CREW,
+    payload: { scheduleType, crewID, crewName }
+  }
+  newState.crews = crews_reducer(newState.crews, a)
+  return a
+}
+
+const a_deleteCrew = (newState: StoreState, scheduleType: ScheduleType, crewID: number) => {
+  let a: CrewActionTypes = {
+    type: DELETE_CREW,
+    payload: { scheduleType, crewID }
+  }
+  newState.crews = crews_reducer(newState.crews, a)
+  return a
+}

@@ -1,0 +1,36 @@
+.fb-row-wrap   { display: flex; flex-flow: row wrap; }
+.fb-row-nowrap { display: flex; flex-flow: row nowrap; }
+.fb-col-wrap   { display: flex; flex-flow: column wrap; }
+.fb-col-nowrap { display: flex; flex-flow: column nowrap; }
+.fi-def    { flex: 1 1 auto; }
+.fi-100    { flex: 1 1 100%; }
+.fi-grow   { flex: 1 0 auto; }
+.fi-shrink { flex: 0 1 auto; }
+.fi-static { flex: 0 0 auto; }
+
+/* Center the spinner */
+.spinner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 9999;
+  width: 120px;
+  height: 120px;
+  margin: -75px 0 0 -75px;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #94D60A;
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

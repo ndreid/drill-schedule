@@ -1,0 +1,12 @@
+.btn-gpor-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.pnl-heading {
+  border: var(--primary-color) 1px solid;
+}
+
+.metrics-fc {
+  margin-bottom: 6px;
+}

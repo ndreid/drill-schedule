@@ -1,0 +1,47 @@
+.spec-townships {
+  overflow: auto;
+}
+
+.spec-townships li:hover {
+  background: #ddd;
+}
+
+.spec-townships li:hover .township-remove {
+  visibility: visible;
+}
+
+/* Style the close button */
+.township-remove {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 1px 14px 5px 14px;
+  font-size: 20px;
+}
+
+.township-remove:hover {
+  background-color: #f44336;
+  color: white;
+  cursor: pointer;
+}
+
+.formation-remove {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 7px 14px 7px 14px;
+  font-size: 15px;
+  height: 37px;
+}
+
+.formation-remove:hover {
+  background-color: darkgray;
+  /* color: white; */
+  cursor: pointer;
+}
+
+.formation:hover .formation-remove {
+  visibility: visible;
+}

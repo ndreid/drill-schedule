@@ -1,0 +1,30 @@
+.vis-item {
+  border-radius: 8px !important;  
+}
+
+.vis-item.vis-blue {
+  color: white;
+  background-color: #434954; /* lightgray; */
+  border-color: black;
+  font-size: 10px;
+}
+
+.vis-item.vis-selected.vis-blue {
+  color: white;
+  background-color: #64DD17;
+  border-color: black;
+}
+
+.vis-timeline {
+  font-size: 10px;
+}
+
+.vis-text {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.vis-panel.vis-left {
+  font-weight: bold;
+  font-size: 10px;
+}

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "downlevelIteration": true,
+    "jsx": "react",
+    "suppressImplicitAnyIndexErrors": true,
+    "strictNullChecks": false,
+    "lib": [
+        "es5", "es2015.core", "dom"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+  }
+}
