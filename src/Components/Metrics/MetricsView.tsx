@@ -60,6 +60,7 @@ class MetricsView extends Component<OwnProps & StateProps & DispatchProps, State
       this.props.setSpinnerVisibility(true).then(() => {
         setTimeout(() => {
           this.props.setScheduleMetrics(this.props.scheduleType, scheduleMetrics).then(() => {
+            console.log('returned, setting to false')
             this.props.setSpinnerVisibility(false).then(resolve)
             this.setState({ showModal: true }, () => {
               this.setState({ showModal: false })

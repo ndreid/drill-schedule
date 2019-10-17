@@ -34,7 +34,7 @@ class CrewView extends Component<OwnProps & StateProps & DispatchProps, State> {
       validated: false,
     }
     this.addCrew = this.addCrew.bind(this)
-    this.updateCrew = this.updateNewCrew.bind(this)
+    this.updateCrew = this.updateCrew.bind(this)
     this.updateNewCrew = this.updateNewCrew.bind(this)
     this.deleteCrew = this.deleteCrew.bind(this)
     this.deleteNewCrew = this.deleteNewCrew.bind(this)
@@ -78,7 +78,6 @@ class CrewView extends Component<OwnProps & StateProps & DispatchProps, State> {
 
 
   render() {
-    console.log(this.state.crews)
     return (
       <Form noValidate validated={this.state.validated} onSubmit={this.handleSubmit}>
         <Card >
@@ -92,7 +91,7 @@ class CrewView extends Component<OwnProps & StateProps & DispatchProps, State> {
           {Object.entries(this.state.crews).map(([crewID, crewName]) =>
             <InputGroup key={crewID}>
               <Form.Group style={{ marginBottom: 0 }}>
-                <Form.Control type="text" placeholder="Crew Name" value={crewName} onChange={e => this.updateCrew(e, +crewID)} required/>
+                <Form.Control id={crewID} type="text" placeholder="Crew Name" value={crewName} onChange={e => this.updateCrew(e, +crewID)} required/>
                 <Form.Control.Feedback type="invalid">Please enter a Crew name</Form.Control.Feedback>
               </Form.Group>
               <InputGroup.Append>

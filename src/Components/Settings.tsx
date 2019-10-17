@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { setOpsScheduleName, saveOpsSchedule, saveOpsScheduleAs, saveOpsScheduleTo, copyOpsScheduleFrom, selectOpsSchedule, deleteOpsSchedule } from '../redux/actions/opsSchedule-actions'
+import { setOpsScheduleName } from '../redux/actions/opsSchedule-actions'
 import { Button, InputGroup, FormControl, FormControlProps } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencilAlt, faSave, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
@@ -18,12 +18,6 @@ interface StateProps {
 interface DispatchProps {
   setOpsScheduleName: Thunk<typeof setOpsScheduleName>
   openModal: typeof openModal
-  saveOpsSchedule: Thunk<typeof saveOpsSchedule>
-  saveOpsScheduleAs: Thunk<typeof saveOpsScheduleAs>
-  saveOpsScheduleTo: Thunk<typeof saveOpsScheduleTo>
-  copyOpsScheduleFrom: Thunk<typeof copyOpsScheduleFrom>
-  deleteOpsSchedule: Thunk<typeof deleteOpsSchedule>
-  selectOpsSchedule: Thunk<typeof selectOpsSchedule>
 }
 interface State {
   editName: boolean
@@ -60,45 +54,45 @@ class Settings extends React.Component<StateProps & DispatchProps, State> {
   }
 
   handleSaveClick() {
-    this.props.openModal(BoolModal, {
-      title: 'Save Changes?',
-      body: 'Save changes to the database?'
-    }, (response) => {
-      if (response === 'y') {
-        this.props.saveOpsSchedule()
-      }
-    })
+    // this.props.openModal(BoolModal, {
+    //   title: 'Save Changes?',
+    //   body: 'Save changes to the database?'
+    // }, (response) => {
+    //   if (response === 'y') {
+    //     this.props.saveOpsSchedule()
+    //   }
+    // })
   }
 
   handleSaveAsClick() {
-    this.props.openModal(SelectOpsScheduleModal, {
-      opsSchedules: this.props.opsSchedules,
-      includeNewSchedule: true,
-    }, (opsScheduleID: number, opsScheduleName?: string) => {
-      if (opsScheduleID === -1) {
-        this.props.saveOpsScheduleAs(opsScheduleName).then(opsScheduleID => {
-          this.props.openModal(BoolModal, {
-            title: 'Confirm',
-            body: `Do you want to open newly created Ops Schedule '${opsScheduleName}'?`
-          }, response => {
-            if (response === 'y')
-              this.props.selectOpsSchedule(opsScheduleID)
-          })
-        }
+    // this.props.openModal(SelectOpsScheduleModal, {
+    //   opsSchedules: this.props.opsSchedules,
+    //   includeNewSchedule: true,
+    // }, (opsScheduleID: number, opsScheduleName?: string) => {
+    //   if (opsScheduleID === -1) {
+    //     this.props.saveOpsScheduleAs(opsScheduleName).then(opsScheduleID => {
+    //       this.props.openModal(BoolModal, {
+    //         title: 'Confirm',
+    //         body: `Do you want to open newly created Ops Schedule '${opsScheduleName}'?`
+    //       }, response => {
+    //         if (response === 'y')
+    //           this.props.selectOpsSchedule(opsScheduleID)
+    //       })
+    //     }
 
-        )
-      } else if (opsScheduleID > -1) {
-        this.props.saveOpsScheduleTo(opsScheduleID).then(() => {
-          this.props.openModal(BoolModal, {
-            title: 'Confirm',
-            body: `Do you want to open Ops Schedule '${this.props.opsSchedules.find(os => os.opsScheduleID === opsScheduleID).opsScheduleName}'?`
-          }, response => {
-            if (response === 'y')
-              this.props.selectOpsSchedule(opsScheduleID)
-          })
-        })
-      }
-    })
+    //     )
+    //   } else if (opsScheduleID > -1) {
+    //     this.props.saveOpsScheduleTo(opsScheduleID).then(() => {
+    //       this.props.openModal(BoolModal, {
+    //         title: 'Confirm',
+    //         body: `Do you want to open Ops Schedule '${this.props.opsSchedules.find(os => os.opsScheduleID === opsScheduleID).opsScheduleName}'?`
+    //       }, response => {
+    //         if (response === 'y')
+    //           this.props.selectOpsSchedule(opsScheduleID)
+    //       })
+    //     })
+    //   }
+    // })
   }
 
   handleCopyFromClick() {
@@ -113,14 +107,14 @@ class Settings extends React.Component<StateProps & DispatchProps, State> {
   }
 
   handleDeleteClick() {
-    let os = this.props.opsSchedule
-    this.props.openModal(BoolModal, {
-      title: 'Confirm',
-      body: `Are you sure you want to permanently delete Ops Schedule '${os.opsScheduleName}'?`
-    }, response => {
-      if (response === 'y')
-        this.props.deleteOpsSchedule(this.props.opsSchedule.opsScheduleID)
-    })
+    // let os = this.props.opsSchedule
+    // this.props.openModal(BoolModal, {
+    //   title: 'Confirm',
+    //   body: `Are you sure you want to permanently delete Ops Schedule '${os.opsScheduleName}'?`
+    // }, response => {
+    //   if (response === 'y')
+    //     this.props.deleteOpsSchedule(this.props.opsSchedule.opsScheduleID)
+    // })
   }
 
   render() {
@@ -143,10 +137,10 @@ class Settings extends React.Component<StateProps & DispatchProps, State> {
             : null
           }
         </InputGroup>
-        <Button variant='success' style={{ marginTop: '1rem' }} onClick={this.handleSaveClick} disabled={!this.props.dirty}>Save</Button>
-        <Button variant='secondary' style={{ marginTop: '1rem' }} onClick={this.handleSaveAsClick}>Save As...</Button>
+        <Button variant='success' style={{ marginTop: '1rem' }} onClick={this.handleSaveClick} disabled>Save</Button>
+        <Button variant='secondary' style={{ marginTop: '1rem' }} onClick={this.handleSaveAsClick} disabled>Save As...</Button>
         <Button variant='secondary' style={{ marginTop: '1rem' }} onClick={this.handleCopyFromClick} disabled>Copy From...</Button>
-        <Button variant='danger' style={{ marginTop: '1rem' }} onClick={this.handleDeleteClick} disabled={this.props.opsSchedule.opsScheduleName === 'Public'}>DELETE</Button>
+        <Button variant='danger' style={{ marginTop: '1rem' }} onClick={this.handleDeleteClick} disabled>DELETE</Button>
       </div>
     )
   }
@@ -161,12 +155,6 @@ const mapStateToProps = (state: StoreState) => ({
 const mapDispatchToProps = dispatch => ({
   setOpsScheduleName: mapActionToProp(setOpsScheduleName, dispatch),
   openModal: mapActionToProp(openModal, dispatch),
-  saveOpsSchedule: mapActionToProp(saveOpsSchedule, dispatch),
-  saveOpsScheduleAs: mapActionToProp(saveOpsScheduleAs, dispatch),
-  saveOpsScheduleTo: mapActionToProp(saveOpsScheduleTo, dispatch),
-  copyOpsScheduleFrom: mapActionToProp(copyOpsScheduleFrom, dispatch),
-  deleteOpsSchedule: mapActionToProp(deleteOpsSchedule, dispatch),
-  selectOpsSchedule: mapActionToProp(selectOpsSchedule, dispatch),
 })
 
 export default connect<StateProps, DispatchProps>(mapStateToProps, mapDispatchToProps)(Settings)

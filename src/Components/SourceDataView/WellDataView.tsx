@@ -4,6 +4,7 @@ import { DragDropArea, Table } from 'react-omni-table'
 import { StoreState, Well } from '../../types';
 import { Thunk, mapActionToProp } from '../../redux/middleware/batched-thunk';
 import { setGPWellNo, setWellWI, setLateralLength, setTVD, setTMD, setSpacingLeft, setSpacingRight, setFormation, setPhaseWindow, setDistrictTownship, setLateralSite, setUnitID, setUnit } from '../../redux/actions/well-actions';
+import { _Number } from 'data-type-ext'
 
 interface StateProps {
   stateCode: string
@@ -74,7 +75,7 @@ class RawDataView extends Component<StateProps & DispatchProps> {
       lateralID: w.lateralID,
       gpWellNo: w.gpWellNo,
       wellName: w.wellName,
-      workingInterest: w.workingInterest,
+      workingInterest: _Number.toFixed(w.workingInterest),
       lateralLength: w.lateralLength,
       tvd: w.tvd,
       tmd: w.tmd,

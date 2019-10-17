@@ -1,2 +1,7 @@
-export { default as sqlService } from './sqlService'
-export { default as mongoService } from './mongoService'
+// export { default as sqlService } from './sqlService'
+
+import * as state from './state.json';
+
+export const service = {
+  getOpsSchedule: (opsScheduleID: number) => state
+}

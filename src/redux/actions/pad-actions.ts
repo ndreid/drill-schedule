@@ -20,57 +20,12 @@ import { pads as pads_reducer } from '../reducers/pads-reducer'
 import { calcWellStagesPerDay, calcWellVertDrillStart, calcWellVertDrillDurationDefault, calcWellHorzDrillDurationDefault, calcWellFracStages, calcWellDrillOutDuration, setWellVertDrillOrder, setWellHorzDrillOrder, calcWellAvgSpacing,
   calcWellConstructionCostDefault, calcWellVertDrillCostDefault, calcWellHorzDrillCostDefault, calcWellFracCostDefault, calcWellDrillOutCostDefault, calcWellFacilitiesCostDefault, calcWellFlowbackCostDefault, moveWell, calcWellName
 } from './well-actions'
-import { sqlService } from '../../services'
 import { _Date } from 'data-type-ext'
 import { isNumber } from 'data-type-ext/_Number'
 import metricsHelper from '../../helpers/metrics-helper';
 import { StoreState, ScheduleType, Pad, Pads, ScheduleMetricsBase, PartialRecord } from '../../types';
 import { Dispatcher } from '../middleware/batched-thunk';
 import { ScheduleTypeMap } from '../../models';
-
-export const loadPads = (opsScheduleID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
-  new Promise((resolve, reject) => {
-    Promise.all([
-      sqlService.getPads(opsScheduleID),
-      sqlService.getPadOverrides(opsScheduleID),
-      sqlService.getPadCrews(opsScheduleID),
-      sqlService.getPadPredecessors(opsScheduleID),
-    ]).then(([padModels, padOverrideModels, padCrewModels, padPredecessorModels]) => {
-      let pads = padModels.reduce<Record<number, Pad>>((padsObj, model) => {
-        let overrides = padOverrideModels.filter(o => o.padID === model.padID).reduce((obj, oModel) => {
-          let scheduleType = ScheduleTypeMap[oModel.scheduleTypeID]
-          obj.manualDates[scheduleType] = oModel.startDate
-          obj.manualDurations[scheduleType] = oModel.duration
-          obj.manualDelays[scheduleType] = oModel.delay
-          return obj
-        }, { manualDates: {}, manualDurations: {}, manualDelays: {} })
-        let crews = padCrewModels.filter(c => c.padID === model.padID).reduce<PartialRecord<ScheduleType, number>>((obj, cModel) => {
-          obj[ScheduleTypeMap[cModel.scheduleTypeID]] = cModel.crewID
-          return obj
-        }, {})
-        let predecessors = padPredecessorModels.filter(pp => pp.padID === model.padID).reduce<PartialRecord<ScheduleType, number>>((obj, ppModel) => {
-          obj[ScheduleTypeMap[ppModel.scheduleTypeID]] = ppModel.predecessorPadID
-          return obj
-        }, {})
-        let successors = padPredecessorModels.filter(pp => pp.predecessorPadID === model.padID).reduce<PartialRecord<ScheduleType, number>>((obj, ppModel) => {
-          obj[ScheduleTypeMap[ppModel.scheduleTypeID]] = ppModel.padID
-          return obj
-        }, {})
-        let pad = {
-          ...model,
-          ...overrides,
-          crews,
-          predecessors,
-          successors,
-        }
-        padsObj[pad.padID] = pad
-        return padsObj
-      }, {})
-      dispatcher.batchAction(a_setPads(newState, pads))
-      resolve()
-    })
-  })
-)
 
 export const createTempPad = (wellID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
   new Promise((resolve, reject) => {
@@ -94,11 +49,8 @@ export const createTempPad = (wellID: number) => (dispatcher: Dispatcher, newSta
       if (!isNumber(predecessorWellID))
         throw Error(`Failed to assign WellID ${wellID} to PadID ${padID}. Could not locate Well without successor.`)
     } else {
-      actions.push(sqlService.getNextPadID().then(newPadID => {
-        console.log('newPadID', newPadID)
-        padID = newPadID
-        dispatcher.batchAction(a_createTempPad(newState, newPadID, tempPadName))
-      }))
+      padID = Math.max(...Object.keys(newState.pads).map(id => +id))
+      dispatcher.batchAction(a_createTempPad(newState, padID, tempPadName))
     }
     Promise.all(actions).then(() => {
       console.log('moving well')
@@ -624,7 +576,7 @@ export const calcPadFlowbackCost= (padID: number) => (dispatcher: Dispatcher, ne
   })
 )
 
-export const calcPadWorkingInterest= (padID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
+export const calcPadWorkingInterest = (padID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
   new Promise((resolve, reject) => {
     let { pads, wells } = newState, pad = pads[padID]
     let padWells = Object.values(wells).filter(w => w.padID === pad.padID)
@@ -640,32 +592,38 @@ export const calcPadWorkingInterest= (padID: number) => (dispatcher: Dispatcher,
 
 export const calcAllScheduleDurations = (scheduleType: ScheduleType) => (dispatcher: Dispatcher, newState: StoreState) => (
   new Promise((resolve, reject) => {
-    Promise.all((() => {
+    console.log('calculating all duration')
+    let actions = (() => {
       switch (scheduleType) {
         case ScheduleType.Construction:
           return Object.keys(newState.pads).map(padID => dispatcher.dispatchSingle(calcPadConstructionDurationDefault(+padID, false)))
         case ScheduleType.Drill:
-          return Object.keys(newState.wells).reduce((arr, wellID) =>
+          return Object.keys(newState.wells).reduce((arr, wellID) => {
             arr.push(
               dispatcher.dispatchSingle(calcWellVertDrillDurationDefault(+wellID)),
               dispatcher.dispatchSingle(calcWellHorzDrillDurationDefault(+wellID))
-            ) && arr, []
-          )
+            )
+            return arr
+          }, [])
         case ScheduleType.Frac:
-          return Object.keys(newState.wells).reduce((arr, wellID) =>
+          return Object.keys(newState.wells).reduce((arr, wellID) => {
             arr.push(
               dispatcher.dispatchSingle(calcWellFracStages(+wellID, false)),
               dispatcher.dispatchSingle(calcWellStagesPerDay(+wellID, false))
-            ) && arr, []
-          )
+            )
+            return arr
+          }, [])
         case ScheduleType.DrillOut:
           return Object.keys(newState.wells).map(wellID => dispatcher.dispatchSingle(calcWellDrillOutDuration(+wellID, false)))
         case ScheduleType.Facilities:
           return Object.keys(newState.pads).map(padID => dispatcher.dispatchSingle(calcPadFacilitiesDurationDefault(+padID, false)))
         default:
-          return undefined
+          return []
       }
-    })()).then(resolve)
+    })()
+    console.log(actions)
+    Promise.all(actions).then(resolve)
+    // Promise.all().then(resolve)
   })
 )
 

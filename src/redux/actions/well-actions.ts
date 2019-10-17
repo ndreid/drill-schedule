@@ -79,63 +79,13 @@ import { calcPadFracDurationDefault, calcPadDrillOutDurationDefault, calcPadVert
   calcPadWorkingInterest,
   setPadName
 } from './pad-actions'
-import { sqlService } from '../../services'
 import metricsHelper from '../../helpers/metrics-helper'
 import { _Date, _G } from 'data-type-ext'
 import { isNumber } from 'data-type-ext/_Number'
 import { StoreState, Wells, ScheduleType, AFEType, DurationType, Well, PartialRecord } from '../../types';
 import { Dispatcher } from '../middleware/batched-thunk';
-import { coalesce } from 'data-type-ext/_G'
 
 // DISPATCHERS
-
-export const loadWells = (opsScheduleID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
-  new Promise((resolve, reject) => {
-    Promise.all([
-      sqlService.getWells(opsScheduleID),
-      sqlService.getWellOverrides(opsScheduleID),
-    ]).then(([wellModels, wellOverrideModels]) => {
-      let wellsArray: Well[] = wellModels.map((m) => {
-        let overrides = wellOverrideModels.find(o => o.wellID === m.wellID)
-        return {
-          ...m,
-          vertDrillOrderManual: overrides.vertDrillOrder,
-          horzDrillOrderManual: overrides.horzDrillOrder,
-          manualDurations: {
-            [DurationType.VertDrill]: overrides.vertDrillDuration,
-            [DurationType.HorzDrill]: overrides.horzDrillDuration,
-          },
-          afes: {
-            [AFEType.Construction]: overrides.constructionAFE,
-            [AFEType.DrillRehab]: overrides.drillRehabAFE,
-            [AFEType.CompletionsRehab]: overrides.completionsRehabAFE,
-            [AFEType.WaterTransfer]: overrides.waterTransferAFE,
-            [AFEType.VertDrill]: overrides.vertDrillAFE,
-            [AFEType.HorzDrill]: overrides.horzDrillAFE,
-            [AFEType.Frac]: overrides.fracAFE,
-            [AFEType.DrillOut]: overrides.drillOutAFE,
-            [AFEType.Facilities]: overrides.facilitiesAFE,
-            [AFEType.Flowback]: overrides.flowbackAFE,
-          }
-        }
-      })
-      let wells: Wells = {}
-
-      for (let well of wellsArray) {
-        let wellOrderNum = getWellOrderNum_R(well, wellsArray)
-        well.vertDrillOrderDefault = wellOrderNum * 2 - 1
-        well.horzDrillOrderDefault = wellOrderNum * 2
-        well.vertDrillOrder = coalesce(well.vertDrillOrderManual, well.vertDrillOrderDefault)
-        well.horzDrillOrder = coalesce(well.horzDrillOrderManual, well.horzDrillOrderDefault)
-        wells[well.wellID] = well
-      }
-      dispatcher.batchAction(a_setWells(newState, wells))
-      resolve()
-    })
-  })
-  // .catch(err => { throw Error('An error occurred while trying to load Wells: \n' + err.message) })
-)
-
 export const moveWell = (wellID: number, newPredecessorWellID: number, newPadID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
   new Promise ((resolve, reject) => {
     if (!isNumber(newPadID))

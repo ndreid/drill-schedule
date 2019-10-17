@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { loadOpsSchedules, selectOpsSchedule, createOpsScheduleFrom } from '../redux/actions/opsSchedule-actions'
+// import { loadOpsSchedules, selectOpsSchedule, createOpsScheduleFrom } from '../redux/actions/opsSchedule-actions'
 import { selectView } from '../redux/actions/view-actions'
 import { setSpinnerVisibility, setDirty } from '../redux/actions/other-actions'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -22,7 +22,7 @@ import Settings from './Settings';
 import ModalContainer from './Modals/ModalContainer';
 import { NewOpsScheduleModal, BoolModal } from './Modals'
 import { openModal } from '../redux/actions/modal-actions';
-import { selectStateCode } from '../redux/actions/stateCode-actions';
+// import { selectStateCode } from '../redux/actions/stateCode-actions';
 import ErrorHandler from './ErrorHandler';
 
 interface OwnProps {
@@ -37,15 +37,16 @@ interface StateProps {
   selectedStateCode: string
   selectedOpsSchedule: OpsSchedule
   opsSchedules: OpsSchedules
+  state: StoreState
 }
 interface DispatchProps {
   setDirty: Thunk<typeof setDirty>
   setSpinnerVisibility: Thunk<typeof setSpinnerVisibility>
-  selectStateCode: Thunk<typeof selectStateCode>
-  loadOpsSchedules: Thunk<typeof loadOpsSchedules>
-  selectOpsSchedule: Thunk<typeof selectOpsSchedule>
+  // selectStateCode: Thunk<typeof selectStateCode>
+  // loadOpsSchedules: Thunk<typeof loadOpsSchedules>
+  // selectOpsSchedule: Thunk<typeof selectOpsSchedule>
   selectView: typeof selectView
-  createOpsScheduleFrom: Thunk<typeof createOpsScheduleFrom>
+  // createOpsScheduleFrom: Thunk<typeof createOpsScheduleFrom>
   openModal: typeof openModal
 }
 interface State {
@@ -66,49 +67,49 @@ class App extends Component<OwnProps & StateProps & DispatchProps, State> {
     this.changeOpsSchedule = this.changeOpsSchedule.bind(this)
     this.changeDisplayMode = this.changeDisplayMode.bind(this)
 
-    if (Object.keys(this.props.opsSchedules).length === 0) {
-      this.getOpsSchedules()
-    } else {
+    // if (Object.keys(this.props.opsSchedules).length === 0) {
+    //   this.getOpsSchedules()
+    // } else {
       this.props.setSpinnerVisibility(false)
-    }
+    // }
   }
 
-  getOpsSchedules() {
-    this.props.setSpinnerVisibility(true).then(() => {
-      this.props.loadOpsSchedules()
-      .then(() => {
-        this.props.setSpinnerVisibility(false)
-      })
-    })
-  }
+  // getOpsSchedules() {
+  //   this.props.setSpinnerVisibility(true).then(() => {
+  //     this.props.loadOpsSchedules()
+  //     .then(() => {
+  //       this.props.setSpinnerVisibility(false)
+  //     })
+  //   })
+  // }
 
   changeOpsSchedule(opsScheduleID: number) {
-    if (this.props.selectedOpsSchedule && this.props.selectedOpsSchedule.opsScheduleID === opsScheduleID)
-      return
+    // if (this.props.selectedOpsSchedule && this.props.selectedOpsSchedule.opsScheduleID === opsScheduleID)
+    //   return
 
-    if (opsScheduleID === -1) {
-      this.props.openModal(NewOpsScheduleModal, {
-        opsSchedules: this.props.opsSchedules
-      }, (opsScheduleName, srcOpsScheduleID, srcType) => {
-        if (opsScheduleName) {
-          this.props.createOpsScheduleFrom(opsScheduleName, srcOpsScheduleID, srcType).then((newOpsScheduleID) => {
-            this.props.openModal(BoolModal, {
-              title: 'Confirm',
-              body: `Open newly created Ops Schedule '${opsScheduleName}?`
-            }, (response) => {
-              if (response === 'y')
-                this.props.selectOpsSchedule(newOpsScheduleID)
-            })
-          })
-        }
-      })
-    } else {
-      this.props.setSpinnerVisibility(true).then(() =>
-        this.props.selectOpsSchedule(opsScheduleID).then(() => {
-          this.props.setSpinnerVisibility(false)
-        })
-      )
-    }
+    // if (opsScheduleID === -1) {
+    //   this.props.openModal(NewOpsScheduleModal, {
+    //     opsSchedules: this.props.opsSchedules
+    //   }, (opsScheduleName, srcOpsScheduleID, srcType) => {
+    //     if (opsScheduleName) {
+    //       this.props.createOpsScheduleFrom(opsScheduleName, srcOpsScheduleID, srcType).then((newOpsScheduleID) => {
+    //         this.props.openModal(BoolModal, {
+    //           title: 'Confirm',
+    //           body: `Open newly created Ops Schedule '${opsScheduleName}?`
+    //         }, (response) => {
+    //           if (response === 'y')
+    //             this.props.selectOpsSchedule(newOpsScheduleID)
+    //         })
+    //       })
+    //     }
+    //   })
+    // } else {
+    //   this.props.setSpinnerVisibility(true).then(() =>
+    //     this.props.selectOpsSchedule(opsScheduleID).then(() => {
+    //       this.props.setSpinnerVisibility(false)
+    //     })
+    //   )
+    // }
   }
 
   changeDisplayMode(displayMode: DisplayMode) {
@@ -120,15 +121,14 @@ class App extends Component<OwnProps & StateProps & DispatchProps, State> {
   getComponent(viewNum: number) {
     let viewType = this.props.selectedViews[viewNum]
     let scheduleType = this.props.selectedScheduleTypes[viewNum]
-    console.log(viewNum, viewType, scheduleType)
     return (
       <div className='fb-row-nowrap' style={{width:'100%', height:'100%'}}>
         <LeftNav selectedView={this.props.selectedViews[viewNum]} selectView={(viewName: ViewType) => this.props.selectView(viewNum, viewName)}/>
         <div className="view" key={'view' + viewNum}>
         {
           viewType === ViewType.Timeline ?
-            <ScheduleShell scheduleType={scheduleType} viewNum={viewNum}>
-              <TimelineView scheduleType={scheduleType}/> 
+            <ScheduleShell scheduleType={scheduleType === ScheduleType.Lateral ? ScheduleType.Drill : scheduleType} hidePadSchedule viewNum={viewNum}>
+              <TimelineView scheduleType={scheduleType === ScheduleType.Lateral ? ScheduleType.Drill : scheduleType} /> 
             </ScheduleShell>
           : viewType === ViewType.Table ?
             <ScheduleShell scheduleType={scheduleType} viewNum={viewNum}>
@@ -173,9 +173,10 @@ class App extends Component<OwnProps & StateProps & DispatchProps, State> {
             opsScheduleID={this.props.selectedOpsSchedule ? this.props.selectedOpsSchedule.opsScheduleID : undefined}
             opsSchedules={Object.values(this.props.opsSchedules)}
             displayMode={this.state.displayMode}
-            onStateCodeChange={this.props.selectStateCode}
-            onOpsScheduleChange={this.changeOpsSchedule}
+            // onStateCodeChange={this.props.selectStateCode}
+            // onOpsScheduleChange={this.changeOpsSchedule}
             onDisplayModeChange={this.changeDisplayMode}
+            state={this.props.state}
           />
           <div className="main fi-def">
             {this.props.selectedOpsSchedule ? (
@@ -213,16 +214,17 @@ const mapStateToProps = (state: StoreState) => ({
   selectedScheduleTypes: state.selectedScheduleTypes,
   selectedViews: state.selectedViews,
   spinnerVisible: state.spinnerVisible,
+  state: state
 })
 
 const mapDispatchToProps = dispatch => ({
   setDirty: mapActionToProp(setDirty, dispatch),
   setSpinnerVisibility: mapActionToProp(setSpinnerVisibility, dispatch),
-  selectStateCode: mapActionToProp(selectStateCode, dispatch),
-  loadOpsSchedules: mapActionToProp(loadOpsSchedules, dispatch),
-  selectOpsSchedule: mapActionToProp(selectOpsSchedule, dispatch),
+  // selectStateCode: mapActionToProp(selectStateCode, dispatch),
+  // loadOpsSchedules: mapActionToProp(loadOpsSchedules, dispatch),
+  // selectOpsSchedule: mapActionToProp(selectOpsSchedule, dispatch),
   selectView: mapActionToProp(selectView, dispatch),
-  createOpsScheduleFrom: mapActionToProp(createOpsScheduleFrom, dispatch),
+  // createOpsScheduleFrom: mapActionToProp(createOpsScheduleFrom, dispatch),
   openModal: mapActionToProp(openModal, dispatch)
 })
 

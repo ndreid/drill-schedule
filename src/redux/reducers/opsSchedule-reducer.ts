@@ -2,7 +2,7 @@
 import { OpsScheduleActionTypes, SET_OPS_SCHEDULE_ID, SET_OPS_SCHEDULES, SET_OPS_SCHEDULE_NAME } from '../action-types/opsSchedule-action-types'
 import { OpsSchedules, OpsSchedule } from '../../types';
 
-export const selectedOpsScheduleID = (state: number = null, actionsObj): number => {
+export const selectedOpsScheduleID = (state: number = 1, actionsObj): number => {
   let actions: OpsScheduleActionTypes[] = Array.isArray(actionsObj) ? actionsObj : [actionsObj], newState = state
   for (let action of actions) {
     switch (action.type) {

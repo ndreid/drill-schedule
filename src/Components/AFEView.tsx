@@ -81,7 +81,6 @@ class AFEView extends Component<StateProps & DispatchProps> {
         drillOutCost: _Number.toCurrency(w.drillOutCost, 0),
         facilitiesCost: _Number.toCurrency(w.facilitiesCost, 0),
         flowbackCost: _Number.toCurrency(w.flowbackCost, 0),
-
       })
       return d
     }, [])

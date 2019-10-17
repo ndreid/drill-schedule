@@ -1,35 +1,11 @@
 import { SET_CREWS, ADD_CREW, UPDATE_CREW, DELETE_CREW, CrewActionTypes } from '../action-types/crew-action-types'
 import { crews as crews_reducer } from '../reducers/crews-reducer'
-import { sqlService } from '../../services'
 import { ScheduleTypeMap } from '../../models'
 import { StoreState, ScheduleType, PartialRecord } from '../../types'
 import { Dispatcher } from '../middleware/batched-thunk';
 import { movePad } from './pad-actions';
 
 // DISPATCHERS
-export const loadCrews = (opsScheduleID: number) => (dispatcher: Dispatcher, newState: StoreState) => (
-  new Promise((resolve, reject) => {
-    sqlService.getCrews(opsScheduleID)
-    .then(crewModels => {
-      let crews: Record<string, Record<number, string>> = {
-        [ScheduleType.Construction]: {},
-        [ScheduleType.Drill]: {},
-        [ScheduleType.Frac]: {},
-        [ScheduleType.DrillOut]: {},
-        [ScheduleType.Facilities]: {},
-        [ScheduleType.Flowback]: {},
-      }
-      for (let crew of crewModels) {
-        crews[ScheduleTypeMap[crew.scheduleTypeID]][crew.crewID] = crew.crewName
-      }
-
-      dispatcher.batchAction(a_setCrews(newState, crews))
-      resolve()
-    })
-    .catch(err => reject(err))
-  })
-)
-
 export const updateCrews = (scheduleType: ScheduleType, crews: Record<number, string>, newCrews: string[]) => (dispatcher: Dispatcher, newState: StoreState) => (
   new Promise((resolve, reject) => {
     let scheduleCrews = newState.crews[scheduleType]
@@ -37,13 +13,16 @@ export const updateCrews = (scheduleType: ScheduleType, crews: Record<number, st
     for (let [id, name] of Object.entries(scheduleCrews)) {
       if (!crews[id])
         actions.push(dispatcher.dispatchSingle(deleteCrew(scheduleType, +id)))
-      else if (name !== crews[id])
-        dispatcher.batchAction(a_updateCrew(newState, scheduleType, +id, name))
+      else if (name !== crews[id]) {
+        dispatcher.batchAction(a_updateCrew(newState, scheduleType, +id, crews[id]))
+      }
     }
+    let nextCrewID = Math.max(...Object.values(newState.crews).reduce((arr: number[], kvp) => {
+      arr.push(...Object.keys(kvp).map(Number))
+      return arr
+    },[]))
     for (let newCrewName of newCrews)
-      actions.push(sqlService.getNextCrewID().then((crewID) => {
-        dispatcher.batchAction(a_addCrew(newState, scheduleType, crewID, newCrewName))
-      }))
+      dispatcher.batchAction(a_addCrew(newState, scheduleType, nextCrewID, newCrewName))
 
     Promise.all(actions).then(resolve)
   })

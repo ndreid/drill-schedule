@@ -1,6 +1,6 @@
 import React from 'react'
-import { DropdownButton, Dropdown, FormProps, FormControlProps } from 'react-bootstrap'
-import { OpsSchedule, DisplayMode } from '../types'
+import { DropdownButton, Dropdown, FormProps, FormControlProps, Button } from 'react-bootstrap'
+import { OpsSchedule, DisplayMode, StoreState } from '../types'
 import { SingleScreenSVG, SplitScreenVertSVG, SplitScreenHorzSVG } from './SVGs'
 import { Form } from 'react-bootstrap';
 import { isNumber } from 'data-type-ext/_Number'
@@ -11,22 +11,23 @@ interface Props {
   opsScheduleID: number
   opsSchedules: OpsSchedule[]
   displayMode: DisplayMode
-  onStateCodeChange: (stateCode: string) => void
-  onOpsScheduleChange: (opsScheduleID: number) => void
+  // onStateCodeChange: (stateCode: string) => void
+  // onOpsScheduleChange: (opsScheduleID: number) => void
   onDisplayModeChange: (displayMode: DisplayMode) => void
+  state: StoreState
 }
-const TopNav: React.FC<Props> = ({ stateCode, opsScheduleID, opsSchedules, displayMode, onStateCodeChange, onOpsScheduleChange, onDisplayModeChange }) => {
+const TopNav: React.FC<Props> = ({ stateCode, opsScheduleID, opsSchedules, displayMode, onDisplayModeChange, state }) => {
 
   const handleChange = (e: React.FormEvent<FormProps & FormControlProps>) => {
-    let { id, value } = e.currentTarget
-    switch (id) {
-      case 'state':
-        onStateCodeChange(value)
-        break
-      case 'ops-schedule':
-        onOpsScheduleChange(+value)
-        break
-    }
+    // let { id, value } = e.currentTarget
+    // switch (id) {
+    //   case 'state':
+    //     onStateCodeChange(value)
+    //     break
+    //   case 'ops-schedule':
+    //     onOpsScheduleChange(+value)
+    //     break
+    // }
   }
   
   return (
@@ -35,18 +36,20 @@ const TopNav: React.FC<Props> = ({ stateCode, opsScheduleID, opsSchedules, displ
       <div style={{ flex: '0 0 auto' }}>
         <Form.Control id='state' style={{ backgroundColor: 'transparent', color: 'var(--secondary-color', borderColor: 'var(--secondary-color)' }} as='select' onChange={handleChange} value={stateCode}>
           <option style={{color: 'black'}}>OH</option>
-          <option style={{color: 'black'}}>OK</option>
         </Form.Control>
       </div>
       <div style={{ flex: '0 0 auto' }}>
         <Form.Control id='ops-schedule' style={{ backgroundColor: 'transparent', color: 'var(--secondary-color', borderColor: 'var(--secondary-color)' }} as='select' onChange={handleChange} value={!isNumber(opsScheduleID) ? 'Select Ops Schedule' : ''+opsScheduleID}>
-          {!isNumber(opsScheduleID) ? <option style={{color: 'black'}}>Select Ops Schedule</option> : undefined}
+          {/* {!isNumber(opsScheduleID) ? <option style={{color: 'black'}}>Select Ops Schedule</option> : undefined} */}
           {opsSchedules.map(os => <option key={os.opsScheduleID} style={{color: 'black'}} value={os.opsScheduleID}>{os.opsScheduleName}</option>)}
-          <option value={-1} style={{color: 'black', fontStyle: 'italic'}}>+ New Schedule</option>
+          {/* <option value={-1} style={{color: 'black', fontStyle: 'italic'}}>+ New Schedule</option> */}
         </Form.Control>
       </div>
+      {/* <div style={{ flex: '0 0 auto' }}>
+        <Button onClick={() => console.log(JSON.stringify(state))}>Log state</Button>
+      </div> */}
       <div style={{ flex: '1 1 auto' }}/>
-      <div style={{ flex: '0 0 auto' }}>
+      {/* <div style={{ flex: '0 0 auto' }}>
         <DropdownButton
           id='display-mode'
           title={displayMode === 'single' ? <SingleScreenSVG width={24} height={24}/>
@@ -59,7 +62,7 @@ const TopNav: React.FC<Props> = ({ stateCode, opsScheduleID, opsSchedules, displ
           <Dropdown.Item eventKey='splitVert'><SplitScreenVertSVG width={24} height={24}/></Dropdown.Item>
           <Dropdown.Item eventKey='splitHorz'><SplitScreenHorzSVG width={24} height={24}/></Dropdown.Item>
         </DropdownButton>
-      </div>
+      </div> */}
     </div>
   )
 }

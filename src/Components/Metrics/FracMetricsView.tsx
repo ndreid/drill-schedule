@@ -136,9 +136,9 @@ class FracMetricsView extends Component<Props, State> {
               <div className="card-body">
 
                 <div className="form-group row">
-                  <label htmlFor="minDaysFromDrillEndToFracStart" className="col-sm-4 col-form-label">Min Drill to Frac</label>
+                  <label htmlFor="minDrillToFrac" className="col-sm-4 col-form-label">Min Drill to Frac</label>
                   <div className="input-group col-sm-8">
-                    <input type="text" className="form-control" id="minDaysFromDrillEndToFracStart" pattern={this.regexNum} value={this.state.metrics.timing.minDrillToFrac} onChange={this.handleTimingChange} required/>
+                    <input type="text" className="form-control" id="minDrillToFrac" pattern={this.regexNum} value={this.state.metrics.timing.minDrillToFrac} onChange={this.handleTimingChange} required/>
                     <div className="input-group-append"><span className="input-group-text">days</span></div>
                     <div className="invalid-feedback">Please enter a number.</div>
                   </div>
@@ -184,7 +184,7 @@ class FracMetricsView extends Component<Props, State> {
             </div>
 
             {/* EFFICIENCY MATRIX */}
-            <div className="card" style={{marginBottom:16}}>
+            <div className="card" style={{marginBottom:16, height: 200}}>
               <div className="card-header"><b>Efficiency Matrix</b></div>
               <div className="card-body" style={{height: "100%", maxHeight: "calc(100vh - 188.33px)", overflowY: "auto" }}>
 

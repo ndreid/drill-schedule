@@ -66,10 +66,11 @@ class TimelineView extends Component<Props, State> {
       selectable: true,
       verticalScroll: true,
       // zoomKey: 'ctrlKey',
-      editable: {
-        updateGroup: (this.props.scheduleType === ScheduleType.Lateral || this.props.scheduleType === ScheduleType.Flowback) ? false : true,
-        updateTime: (this.props.scheduleType === ScheduleType.Lateral || this.props.scheduleType === ScheduleType.Flowback) ? false : true,
-      },
+      // editable: {
+      //   updateGroup: false,
+      //   updateTime: false,
+      // },
+      editable: false,
       zoomMin: 604800000,
       zoomMax: 157680000000,
       tooltip: {
@@ -163,11 +164,11 @@ class TimelineView extends Component<Props, State> {
   getItem(pad: Pad) {
     var timelineGroupID = this.getGroupID(pad)
     switch (this.props.scheduleType) {
-      case ScheduleType.Lateral: return [{ id: pad.padID + '-drilling', content: this.getItemContent(pad, ScheduleType.Drill), start: pad.drillStart, end: pad.drillEnd, group: timelineGroupID, className: 'vis-blue' }
-                                    ,{ id: pad.padID + '-frac', content: this.getItemContent(pad, ScheduleType.Frac), start: pad.fracStart, end: pad.fracEnd, group: timelineGroupID, className: 'vis-blue' }
-                                    ,{ id: pad.padID + '-drillout', content: this.getItemContent(pad, ScheduleType.DrillOut), start: pad.drillOutStart, end: pad.drillOutEnd, group: timelineGroupID, className: 'vis-blue' }
-                                    ,{ id: pad.padID + '-facilities', content: this.getItemContent(pad, ScheduleType.Facilities), start: pad.facilitiesStart, end: pad.facilitiesEnd, group: timelineGroupID, className: 'vis-blue' }
-                                    ,{ id: pad.padID + '-flowback', content: this.getItemContent(pad, ScheduleType.Frac), start: pad.firstFlow, group: timelineGroupID, className: 'vis-blue' }]
+      case ScheduleType.Lateral: return [{ id: pad.padID + '-drilling', content: this.getItemContent(pad), start: pad.drillStart, end: pad.drillEnd, group: timelineGroupID, className: 'vis-blue' }
+                                    ,{ id: pad.padID + '-frac', content: this.getItemContent(pad), start: pad.fracStart, end: pad.fracEnd, group: timelineGroupID, className: 'vis-blue' }
+                                    ,{ id: pad.padID + '-drillout', content: this.getItemContent(pad), start: pad.drillOutStart, end: pad.drillOutEnd, group: timelineGroupID, className: 'vis-blue' }
+                                    ,{ id: pad.padID + '-facilities', content: this.getItemContent(pad), start: pad.facilitiesStart, end: pad.facilitiesEnd, group: timelineGroupID, className: 'vis-blue' }
+                                    ,{ id: pad.padID + '-flowback', content: this.getItemContent(pad), start: pad.firstFlow, group: timelineGroupID, className: 'vis-blue' }]
       case ScheduleType.Construction:
       case ScheduleType.Drill:
       case ScheduleType.Frac:
@@ -175,61 +176,29 @@ class TimelineView extends Component<Props, State> {
       case ScheduleType.Facilities:
         return {
           id: pad.padID,
-          content: this.getItemContent(pad, this.props.scheduleType),
+          content: this.getItemContent(pad),
           start: padHelper.getScheduleStartDate(pad, this.props.scheduleType),
           end: padHelper.getScheduleEndDate(pad, this.props.scheduleType),
           group: timelineGroupID,
           className: 'vis-blue',
-          title: '<div><div>Start Date:</div><div>Manual Start:</div><div>Duration:</div></div>'
         }
 
       case ScheduleType.Flowback:
         return {
           id: pad.padID,
-          content: this.getItemContent(pad, ScheduleType.Flowback),
+          content: this.getItemContent(pad),
           start: pad.firstFlow,
           group: timelineGroupID, className: 'vis-blue' }
       default: throw new Error("getTimelineItem() is not configured to handle ScheduleType '" + this.props.scheduleType + "'.")
     }
   }
 
-  getItemContent(pad: Pad, scheduleType: ScheduleType) {
-    return this.getItemContentTitle(pad.padName) + this.getItemContentDetails(pad, scheduleType)
+  getItemContent(pad: Pad) {
+    return this.getItemContentTitle(pad.padName)
   }
 
   getItemContentTitle(title: string) {
     return '<div style="font-size: 12px"><b>' + title + '</b></div>'
-  }
-
-  getItemContentDetails(pad: Pad, scheduleType: ScheduleType) {
-    let manualStart = padHelper.getScheduleStartDateManual(pad, scheduleType)
-    switch (scheduleType) {
-      case ScheduleType.Construction:
-      case ScheduleType.Drill:
-      case ScheduleType.Frac:
-      case ScheduleType.DrillOut:
-      case ScheduleType.Facilities:
-      case ScheduleType.Flowback:
-        return '<div style="font-size: 8px">Manual Start: ' + _Date.format(manualStart, 'MM/dd/yyyy') + '</div>'
-        // var vertDO = ''
-        // var horzDO = ''
-        //******** NEED TO GET SET THIS UP
-        // for (var i = 1; i <= this.wells.size; i++) {
-        //   for (let well of Array.from(this.wells.values())) {
-        //     if (well.vertDrillOrder === i) { vertDO += well.wellCode + ', '; break }
-        //     else if (well.horzDrillOrder === i) { horzDO += well.wellCode + ', '; break }
-        //   }
-        // }
-        // vertDO = vertDO.substring(0, vertDO.length - 2)
-        // horzDO = horzDO.substring(0, horzDO.length - 2)
-        // return ''//'<div style="font-size: 8px">Vert Drill Order: ' + vertDO + '</div><div style="font-size: 8px">Horz Drill Order: ' + horzDO + '</div>'
-        // return ''//'<div style="font-size: 8px">Total Stages: ' + this.fracStages + '</div><div style="font-size: 8px">Avg Lat Length: ' + Math.round(this.lateralLength / this.wells.size) + '</div>'
-        // return ''
-        // return ''
-        // return ''//'<div style="font-size: 8px">Avg Lat Length: ' + Math.round(this.getAvgLateralLength() + '</div>')
-      default:
-        throw new Error("'getTimelineItemContentDetails' method is not configured to handle ScheduleType '" + scheduleType + "'.")
-    }
   }
 
   render() {

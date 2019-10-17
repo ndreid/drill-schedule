@@ -50,7 +50,7 @@ class PadConstructionMetricsView extends Component<Props, State> {
 
   handleCostChange(event) {
     var metrics: ConstructionMetrics = Object.assign({}, this.state.metrics)
-    metrics.costs[event.target.id] = event.target.value
+    metrics.costs.initialCost[event.target.id] = event.target.value
     this.setState({ metrics: metrics })
   }
 
@@ -66,9 +66,9 @@ class PadConstructionMetricsView extends Component<Props, State> {
               <div className="card-body">
 
                 <div className="form-group row">
-                  <label htmlFor="defPadConstructionBeforeRigSpud" className="col-sm-6 col-form-label">Default Pad Constr Before Rig Spud</label>
+                  <label htmlFor="defConstructionBeforeRigSpud" className="col-sm-6 col-form-label">Default Pad Constr Before Rig Spud</label>
                   <div className="input-group col-sm-6">
-                    <input type="text" className="form-control" id="defPadConstructionBeforeRigSpud" pattern={this.regexNum} value={this.state.metrics.timing.defConstructionBeforeRigSpud} onChange={this.handleTimingChange} required/>
+                    <input type="text" className="form-control" id="defConstructionBeforeRigSpud" pattern={this.regexNum} value={this.state.metrics.timing.defConstructionBeforeRigSpud} onChange={this.handleTimingChange} required/>
                     <div className="input-group-append"><span className="input-group-text">days</span></div>
                     <div className="invalid-feedback">Please enter a number.</div>
                   </div>
